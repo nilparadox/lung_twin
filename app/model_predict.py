@@ -5,8 +5,8 @@ import joblib
 import pandas as pd
 
 
-MODEL_PATH = Path("models/digital_lung_model_compact.joblib")
-METADATA_PATH = Path("models/digital_lung_model_compact_metadata.joblib")
+MODEL_PATH = Path("models/digital_lung_model_compact_v2.joblib")
+METADATA_PATH = Path("models/digital_lung_model_compact_v2_metadata.joblib")
 
 _MODEL = None
 _METADATA = None
@@ -34,7 +34,6 @@ def estimate_baseline_lung(age: int, asthma: int, smoker: int, activity: str) ->
 
     if asthma:
         b -= 0.14
-
     if smoker:
         b -= 0.11
 
@@ -43,7 +42,7 @@ def estimate_baseline_lung(age: int, asthma: int, smoker: int, activity: str) ->
     elif activity == "jog":
         b += 0.01
 
-    return round(clamp(b, 0.60, 1.08), 2)
+    return round(clamp(b, 0.55, 1.08), 2)
 
 
 def sensitivity_label(baseline_lung: float) -> str:
@@ -70,54 +69,6 @@ def load_model_bundle():
         _METADATA = joblib.load(METADATA_PATH)
 
     return _MODEL, _METADATA
-
-
-def _age_adjustments(age: int):
-    if age >= 75:
-        return {
-            "risk_bonus": 16.0,
-            "safe_factor": 0.62,
-            "recovery_factor": 1.45,
-            "lung_factor": 1.24,
-            "inflam_factor": 1.28,
-            "oxygen_factor": 1.25,
-        }
-    if age >= 65:
-        return {
-            "risk_bonus": 11.0,
-            "safe_factor": 0.72,
-            "recovery_factor": 1.32,
-            "lung_factor": 1.17,
-            "inflam_factor": 1.20,
-            "oxygen_factor": 1.18,
-        }
-    if age >= 55:
-        return {
-            "risk_bonus": 7.0,
-            "safe_factor": 0.82,
-            "recovery_factor": 1.20,
-            "lung_factor": 1.10,
-            "inflam_factor": 1.12,
-            "oxygen_factor": 1.12,
-        }
-    if age >= 45:
-        return {
-            "risk_bonus": 3.5,
-            "safe_factor": 0.91,
-            "recovery_factor": 1.10,
-            "lung_factor": 1.05,
-            "inflam_factor": 1.06,
-            "oxygen_factor": 1.06,
-        }
-
-    return {
-        "risk_bonus": 0.0,
-        "safe_factor": 1.00,
-        "recovery_factor": 1.00,
-        "lung_factor": 1.00,
-        "inflam_factor": 1.00,
-        "oxygen_factor": 1.00,
-    }
 
 
 def predict_with_trained_model(
@@ -161,16 +112,6 @@ def predict_with_trained_model(
     inflammation_score = max(0.0, float(pred[4]))
     irritation_probability = clamp(float(pred[5]), 0.0, 1.0)
     oxygen_drop_pct = clamp(float(pred[6]), 0.0, 12.0)
-
-    adj = _age_adjustments(age)
-
-    risk_score = clamp(risk_score + adj["risk_bonus"], 0.0, 100.0)
-    safe_minutes = clamp(safe_minutes * adj["safe_factor"], 5.0, 240.0)
-    recovery_minutes = clamp(recovery_minutes * adj["recovery_factor"], 5.0, 1440.0)
-    lung_load = max(0.0, lung_load * adj["lung_factor"])
-    inflammation_score = max(0.0, inflammation_score * adj["inflam_factor"])
-    irritation_probability = clamp(irritation_probability * adj["inflam_factor"], 0.0, 1.0)
-    oxygen_drop_pct = clamp(oxygen_drop_pct * adj["oxygen_factor"], 0.0, 12.0)
 
     if risk_score < 20:
         band = "low"
