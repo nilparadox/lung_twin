@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZetaQ AirWise AI</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <img src="/static/assets/logo.PNG" alt="ZetaQ Logo" class="brand-logo" />
+      <div class="brand-text">
+        <h1>ZetaQ AirWise AI</h1>
+        <p>Live air quality + weather + AI digital-lung prediction</p>
+      </div>
+    </div>
+
+    <section class="hero-card">
+      <h2>AI-based outdoor air risk for you</h2>
+      <p>
+        This version uses live environmental data and your trained digital-lung AI model to estimate risk, safe time, recovery, lung load, and inflammation.
+      </p>
+      <div class="badge-row">
+        <div class="badge">AI model</div>
+        <div class="badge">Digital twin outputs</div>
+        <div class="badge">Mobile first</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>Air risk check</h3>
+      <form method="post" action="/predict" class="form-grid">
+        <label>
+          City / Town / Area
+          <input type="text" name="city" id="city" value="{{ form_data.city }}" placeholder="Mumbai, Nashik, Kalyan..." required />
+        </label>
+
+        <div class="inline-grid">
+          <label>
+            Age
+            <input type="number" name="age" value="{{ form_data.age }}" min="1" max="110" required />
+          </label>
+
+          <label>
+            Exposure Minutes
+            <input type="number" name="exposure_min" value="{{ form_data.exposure_min }}" step="0.1" min="1" max="600" required />
+          </label>
+        </div>
+
+        <div class="inline-grid">
+          <label>
+            Activity
+            <select name="activity">
+              <option value="rest" {% if form_data.activity == "rest" %}selected{% endif %}>Resting</option>
+              <option value="walk" {% if form_data.activity == "walk" %}selected{% endif %}>Walking / commute</option>
+              <option value="jog" {% if form_data.activity == "jog" %}selected{% endif %}>Jogging</option>
+              <option value="exercise" {% if form_data.activity == "exercise" %}selected{% endif %}>Heavy exercise</option>
+            </select>
+          </label>
+
+          <label>
+            Mask
+            <select name="mask_type">
+              <option value="none" {% if form_data.mask_type == "none" %}selected{% endif %}>No mask</option>
+              <option value="cloth" {% if form_data.mask_type == "cloth" %}selected{% endif %}>Cloth mask</option>
+              <option value="surgical" {% if form_data.mask_type == "surgical" %}selected{% endif %}>Surgical mask</option>
+              <option value="n95" {% if form_data.mask_type == "n95" %}selected{% endif %}>N95</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="inline-grid">
+          <label>
+            Asthma / wheezing
+            <select name="asthma">
+              <option value="0" {% if form_data.asthma == 0 %}selected{% endif %}>No</option>
+              <option value="1" {% if form_data.asthma == 1 %}selected{% endif %}>Yes</option>
+            </select>
+          </label>
+
+          <label>
+            Smoker
+            <select name="smoker">
+              <option value="0" {% if form_data.smoker == 0 %}selected{% endif %}>No</option>
+              <option value="1" {% if form_data.smoker == 1 %}selected{% endif %}>Yes</option>
+            </select>
+          </label>
+        </div>
+
+        <button type="submit">Check My Air Risk</button>
+        <button type="button" class="secondary-btn" id="use-location-btn">Use My Current Location</button>
+      </form>
+
+      {% if error %}
+      <div class="error-box">{{ error }}</div>
+      {% endif %}
+    </section>
+
+    {% if result and chart_data %}
+    <section class="card">
+      <h3>Visual summary</h3>
+
+      <div class="gauge-card">
+        <div class="gauge-title">Overall AI Risk</div>
+        <div class="risk-gauge">
+          <div class="risk-gauge-fill" style="width: {{ chart_data.risk_pct }}%;"></div>
+        </div>
+        <div class="gauge-number">{{ result.risk_score }} / 100 · {{ result.risk_band }}</div>
+      </div>
+
+      <div class="mini-chart-card">
+        <div class="mini-chart-title">Exposure vs safe time</div>
+
+        <div class="bar-label-row">
+          <span>Your planned exposure</span>
+          <strong>{{ form_data.exposure_min }} min</strong>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill exposure-fill" style="width: {{ chart_data.exposure_pct }}%;"></div>
+        </div>
+
+        <div class="bar-label-row">
+          <span>AI-estimated safe outdoor time</span>
+          <strong>{{ result.safe_minutes }} min</strong>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill safe-fill" style="width: {{ chart_data.safe_pct }}%;"></div>
+        </div>
+
+        <div class="bar-label-row">
+          <span>Recovery time</span>
+          <strong>{{ result.recovery_minutes }} min</strong>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill recovery-fill" style="width: {{ chart_data.recovery_pct }}%;"></div>
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if place or air_data or weather %}
+    <section class="card">
+      <h3>Live environment data</h3>
+      <div class="result-grid">
+        <div class="metric"><span>Place</span><strong>{{ place.display_name if place else "—" }}</strong></div>
+        <div class="metric"><span>Air source</span><strong>{{ air_data.source_label if air_data else "—" }}</strong></div>
+        <div class="metric"><span>PM2.5</span><strong>{{ air_data.pm25 if air_data else "—" }}</strong></div>
+        <div class="metric"><span>PM10</span><strong>{{ air_data.pm10 if air_data else "—" }}</strong></div>
+        <div class="metric"><span>NO2</span><strong>{{ air_data.no2 if air_data else "—" }}</strong></div>
+        <div class="metric"><span>O3</span><strong>{{ air_data.o3 if air_data else "—" }}</strong></div>
+        <div class="metric"><span>Temperature</span><strong>{{ weather.temp_c if weather else "—" }}</strong></div>
+        <div class="metric"><span>Humidity</span><strong>{{ weather.humidity if weather else "—" }}</strong></div>
+      </div>
+
+      {% if air_data %}
+      <div class="source-note">{{ air_data.source_note }}</div>
+      {% endif %}
+
+      {% if chart_data %}
+      <div class="pollutant-panel">
+        <div class="pollutant-title">Pollutant intensity snapshot</div>
+
+        <div class="pollutant-row">
+          <span>PM2.5</span>
+          <div class="progress-track"><div class="progress-fill pm25-fill" style="width: {{ chart_data.pm25_pct }}%;"></div></div>
+          <strong>{{ air_data.pm25 }}</strong>
+        </div>
+
+        <div class="pollutant-row">
+          <span>PM10</span>
+          <div class="progress-track"><div class="progress-fill pm10-fill" style="width: {{ chart_data.pm10_pct }}%;"></div></div>
+          <strong>{{ air_data.pm10 }}</strong>
+        </div>
+
+        <div class="pollutant-row">
+          <span>NO2</span>
+          <div class="progress-track"><div class="progress-fill no2-fill" style="width: {{ chart_data.no2_pct }}%;"></div></div>
+          <strong>{{ air_data.no2 }}</strong>
+        </div>
+
+        <div class="pollutant-row">
+          <span>O3</span>
+          <div class="progress-track"><div class="progress-fill o3-fill" style="width: {{ chart_data.o3_pct }}%;"></div></div>
+          <strong>{{ air_data.o3 }}</strong>
+        </div>
+      </div>
+      {% endif %}
+    </section>
+    {% endif %}
+
+    {% if risk_plot or pollution_plot %}
+    <section class="card">
+      <h3>Plots</h3>
+
+      {% if risk_plot %}
+      <div class="plot-block">
+        <img src="data:image/png;base64,{{ risk_plot }}" alt="Exposure Risk Plot" class="plot-img" />
+      </div>
+      {% endif %}
+
+      {% if pollution_plot %}
+      <div class="plot-block">
+        <img src="data:image/png;base64,{{ pollution_plot }}" alt="Current Pollution Plot" class="plot-img" />
+      </div>
+      {% endif %}
+    </section>
+    {% endif %}
+
+    {% if recommendations %}
+    <section class="card">
+      <h3>Helpful suggestions</h3>
+      <ul class="rec-list">
+        {% for rec in recommendations %}
+        <li>{{ rec }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+
+    {% if result and chart_data %}
+    <section class="card">
+      <h3>AI digital-lung prediction</h3>
+      <div class="result-grid">
+        <div class="metric"><span>Risk Score</span><strong>{{ result.risk_score }}</strong></div>
+        <div class="metric"><span>Risk Band</span><strong>{{ result.risk_band }}</strong></div>
+        <div class="metric"><span>Safe Outdoor Minutes</span><strong>{{ result.safe_minutes }}</strong></div>
+        <div class="metric"><span>Recovery Minutes</span><strong>{{ result.recovery_minutes }}</strong></div>
+        <div class="metric"><span>Lung Load</span><strong>{{ result.lung_load }}</strong></div>
+        <div class="metric"><span>Inflammation Score</span><strong>{{ result.inflammation_score }}</strong></div>
+        <div class="metric"><span>Irritation Probability</span><strong>{{ result.irritation_probability }}</strong></div>
+        <div class="metric"><span>Oxygen Stress %</span><strong>{{ result.oxygen_drop_pct }}</strong></div>
+        <div class="metric"><span>Baseline Lung</span><strong>{{ result.baseline_lung }}</strong></div>
+        <div class="metric"><span>Sensitivity</span><strong>{{ result.sensitivity }}</strong></div>
+      </div>
+
+      <div class="bar-block">
+        <div class="bar-label-row"><span>Lung load</span><strong>{{ result.lung_load }}</strong></div>
+        <div class="progress-track"><div class="progress-fill lung-fill" style="width: {{ chart_data.lung_pct }}%;"></div></div>
+      </div>
+
+      <div class="bar-block">
+        <div class="bar-label-row"><span>Inflammation</span><strong>{{ result.inflammation_score }}</strong></div>
+        <div class="progress-track"><div class="progress-fill inflam-fill" style="width: {{ chart_data.inflam_pct }}%;"></div></div>
+      </div>
+
+      <div class="bar-block">
+        <div class="bar-label-row"><span>Irritation probability</span><strong>{{ result.irritation_probability }}</strong></div>
+        <div class="progress-track"><div class="progress-fill irrit-fill" style="width: {{ chart_data.irrit_pct }}%;"></div></div>
+      </div>
+
+      <div class="bar-block">
+        <div class="bar-label-row"><span>Oxygen stress</span><strong>{{ result.oxygen_drop_pct }}%</strong></div>
+        <div class="progress-track"><div class="progress-fill oxygen-fill" style="width: {{ chart_data.oxygen_pct }}%;"></div></div>
+      </div>
+
+      <div class="advice-box">
+        <span>Guidance</span>
+        <p>{{ result.advice }}</p>
+      </div>
+    </section>
+    {% endif %}
+
+    <p class="footer-note">Built by ZetaQ. Informational only; not a medical diagnosis.</p>
+  </div>
+
+  <script>
+    const btn = document.getElementById("use-location-btn");
+    const cityInput = document.getElementById("city");
+
+    async function reverseGeocode(lat, lon) {
+      const url = `https://geocoding-api.open-meteo.com/v1/reverse?latitude=${lat}&longitude=${lon}&language=en&format=json`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Reverse geocoding failed");
+      const data = await res.json();
+      if (!data.results || !data.results.length) throw new Error("No nearby place found");
+      const p = data.results[0];
+      return [p.name, p.admin1, p.country].filter(Boolean).join(", ");
+    }
+
+    if (btn) {
+      btn.addEventListener("click", () => {
+        if (!navigator.geolocation) {
+          alert("Geolocation is not supported on this device.");
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = "Getting your location...";
+
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            try {
+              const place = await reverseGeocode(pos.coords.latitude, pos.coords.longitude);
+              cityInput.value = place;
+              btn.textContent = "Location detected";
+            } catch (e) {
+              alert("Could not detect a nearby place. Please type your town manually.");
+              btn.textContent = "Use My Current Location";
+            } finally {
+              btn.disabled = false;
+            }
+          },
+          () => {
+            alert("Location access denied. Please type your city manually.");
+            btn.disabled = false;
+            btn.textContent = "Use My Current Location";
+          },
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+        );
+      });
+    }
+  </script>
+</body>
+</html>

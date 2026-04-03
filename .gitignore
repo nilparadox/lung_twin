@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.DS_Store
+
+models/digital_lung_model.joblib
+models/digital_lung_model_compact.joblib
+models/digital_lung_model_compact_metadata.joblib
+models/digital_lung_model_metadata.joblib

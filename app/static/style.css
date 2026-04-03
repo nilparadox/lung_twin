@@ -1,0 +1,258 @@
+:root {
+  --bg: #07111f;
+  --panel: #0e1a2f;
+  --panel-2: #12213b;
+  --text: #eef4ff;
+  --muted: #a9b8d8;
+  --border: #24385e;
+  --accent: #69b7ff;
+  --shadow: 0 14px 40px rgba(0, 0, 0, 0.24);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background:
+    radial-gradient(circle at top right, rgba(105, 183, 255, 0.12), transparent 26%),
+    linear-gradient(180deg, #07111f 0%, #091425 100%);
+  color: var(--text);
+  font-family: Inter, Arial, sans-serif;
+}
+
+.page {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 16px 14px 40px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0 16px;
+}
+
+.brand-logo {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  padding: 6px;
+}
+
+.brand-text h1 { margin: 0; font-size: 1.35rem; line-height: 1.1; }
+.brand-text p { margin: 4px 0 0; color: var(--muted); font-size: 0.92rem; }
+
+.hero-card, .card {
+  background: rgba(14, 26, 47, 0.96);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+}
+
+.hero-card { padding: 18px; margin-bottom: 14px; }
+.hero-card h2 { margin: 0 0 8px; font-size: 1.28rem; }
+.hero-card p { margin: 0; color: var(--muted); line-height: 1.5; }
+
+.card { padding: 16px; margin-bottom: 14px; }
+.card h3 { margin: 0 0 8px; font-size: 1.06rem; }
+
+.form-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.inline-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+input, select, button {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  padding: 13px 14px;
+  font-size: 1rem;
+}
+
+input, select {
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+button {
+  background: linear-gradient(135deg, var(--accent), #9fd5ff);
+  color: #07111f;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+}
+
+.secondary-btn {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.badge {
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-size: 0.84rem;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  background: #0b1730;
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.metric {
+  background: #0b1730;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 12px;
+}
+
+.metric span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin-bottom: 6px;
+}
+
+.metric strong { font-size: 1.02rem; }
+
+.gauge-card, .mini-chart-card, .pollutant-panel, .bar-block {
+  background: #0b1730;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 14px;
+  margin-top: 12px;
+}
+
+.gauge-title, .mini-chart-title, .pollutant-title {
+  font-size: 0.92rem;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.risk-gauge, .progress-track {
+  width: 100%;
+  height: 14px;
+  border-radius: 999px;
+  background: #12203b;
+  overflow: hidden;
+}
+
+.risk-gauge-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4dd9a6 0%, #f0d85b 50%, #ff7f7f 100%);
+}
+
+.progress-fill { height: 100%; border-radius: 999px; }
+.exposure-fill { background: linear-gradient(90deg, #7ab8ff, #4d8dff); }
+.safe-fill { background: linear-gradient(90deg, #62e0a3, #35c97a); }
+.recovery-fill { background: linear-gradient(90deg, #f0c96a, #e59f39); }
+.lung-fill { background: linear-gradient(90deg, #6fb4ff, #3d86ff); }
+.inflam-fill { background: linear-gradient(90deg, #ffcc70, #ff9152); }
+.irrit-fill { background: linear-gradient(90deg, #ffb3a7, #ff6c6c); }
+.oxygen-fill { background: linear-gradient(90deg, #d79bff, #9b6cff); }
+.pm25-fill { background: linear-gradient(90deg, #8de3b4, #41c982); }
+.pm10-fill { background: linear-gradient(90deg, #95c5ff, #4f8cff); }
+.no2-fill { background: linear-gradient(90deg, #ffd280, #f0a22d); }
+.o3-fill { background: linear-gradient(90deg, #ffb2d0, #f06aa6); }
+
+.gauge-number { margin-top: 10px; font-weight: 700; }
+
+.bar-label-row, .pollutant-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.pollutant-row {
+  grid-template-columns: 70px 1fr auto;
+  margin-bottom: 12px;
+}
+
+.advice-box {
+  margin-top: 12px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+  background: #0b1730;
+}
+
+.advice-box span {
+  display: block;
+  color: var(--muted);
+  margin-bottom: 8px;
+  font-size: 0.88rem;
+}
+
+.source-note, .footer-note, .error-box {
+  color: var(--muted);
+  line-height: 1.5;
+  margin-top: 10px;
+}
+
+.error-box {
+  color: #ffb0b0;
+  background: #25131a;
+  border: 1px solid #663444;
+  border-radius: 14px;
+  padding: 12px;
+}
+
+@media (max-width: 480px) {
+  .inline-grid, .result-grid { grid-template-columns: 1fr; }
+  .pollutant-row { grid-template-columns: 1fr; }
+  .brand-logo { width: 46px; height: 46px; }
+  .brand-text h1 { font-size: 1.18rem; }
+}
+
+.plot-block {
+  margin-top: 12px;
+  background: #0b1730;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 12px;
+}
+
+.plot-img {
+  width: 100%;
+  max-width: 100%;
+  display: block;
+  border-radius: 12px;
+}
+
+.rec-list {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--text);
+  line-height: 1.7;
+}
+
+.rec-list li {
+  margin-bottom: 8px;
+}
