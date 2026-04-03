@@ -1,9 +1,10 @@
 fastapi
 uvicorn
-jinja2
-python-multipart
-requests
-python-dotenv
-joblib
+numpy
 pandas
 scikit-learn
+joblib
+requests
+jinja2
+matplotlib
+python-dotenv
