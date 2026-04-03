@@ -173,3 +173,11 @@ def predict(
 @app.get("/health")
 def health():
     return JSONResponse({"status": "ok"})
+
+@app.head("/health")
+def health_head():
+    return Response(status_code=200)
+
+
+from fastapi.responses import Response
+
