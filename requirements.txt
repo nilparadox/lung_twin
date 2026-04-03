@@ -8,3 +8,4 @@ requests
 jinja2
 matplotlib
 python-dotenv
+python-multipart
